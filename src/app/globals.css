@@ -1,26 +1,375 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
+/*
+ * Rubics Realty tokens. Concept: Art Deco lift lobby (navy lacquer, brass indicator, cream travertine)
+ * read against a tower section drawing. OKLCH is the source of truth. See DESIGN.md.
+ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Navy lacquer */
+  --lacquer: oklch(0.2 0.045 266);
+  --navy: oklch(0.27 0.06 262);
+  --navy-2: oklch(0.32 0.06 262);
+  /* Travertine */
+  --travertine: oklch(0.955 0.018 85);
+  --travertine-2: oklch(0.92 0.028 82);
+  --graphite: oklch(0.25 0.03 262);
+  --graphite-muted: oklch(0.45 0.025 262);
+  --ivory: oklch(0.95 0.015 85);
+  --ivory-muted: oklch(0.78 0.02 262);
+  /* Brass: line and numeral only */
+  --brass: oklch(0.77 0.115 75);
+  --brass-deep: oklch(0.5 0.09 70);
+  /* Datum hairlines */
+  --datum: oklch(0.82 0.02 80);
+  --datum-navy: oklch(0.38 0.045 262);
+  /* Project accents */
+  --beaumonte: oklch(0.6 0.15 38);
+  --beaumonte-deep: oklch(0.52 0.15 36);
+  --beaumonte-light: oklch(0.72 0.13 42);
+  --lalbaug: oklch(0.7 0.09 160);
+  --lalbaug-deep: oklch(0.47 0.08 162);
+  --error: oklch(0.5 0.17 27);
+
+  /* Per-page accent, overridden by .accent-* */
+  --accent-ink: var(--brass-deep);
+  --accent-on-navy: var(--brass);
+
+  /* shadcn semantic mapping */
+  --background: var(--travertine);
+  --foreground: var(--graphite);
+  --card: var(--travertine);
+  --card-foreground: var(--graphite);
+  --popover: var(--travertine);
+  --popover-foreground: var(--graphite);
+  --primary: var(--navy);
+  --primary-foreground: var(--ivory);
+  --secondary: var(--travertine-2);
+  --secondary-foreground: var(--graphite);
+  --muted: var(--travertine-2);
+  --muted-foreground: var(--graphite-muted);
+  --accent: var(--travertine-2);
+  --accent-foreground: var(--graphite);
+  --destructive: var(--error);
+  --border: var(--datum);
+  --input: var(--datum);
+  --ring: var(--brass-deep);
+  --radius: 0rem;
+
+  --ease-lift: cubic-bezier(0.65, 0, 0.35, 1);
+  --header-h: 4.5rem;
+}
+
+.accent-beaumonte {
+  --accent-ink: var(--beaumonte-deep);
+  --accent-on-navy: var(--beaumonte-light);
+}
+.accent-lalbaug {
+  --accent-ink: var(--lalbaug-deep);
+  --accent-on-navy: var(--lalbaug);
 }
 
 @theme inline {
+  --color-lacquer: var(--lacquer);
+  --color-navy: var(--navy);
+  --color-navy-2: var(--navy-2);
+  --color-travertine: var(--travertine);
+  --color-travertine-2: var(--travertine-2);
+  --color-graphite: var(--graphite);
+  --color-graphite-muted: var(--graphite-muted);
+  --color-ivory: var(--ivory);
+  --color-ivory-muted: var(--ivory-muted);
+  --color-brass: var(--brass);
+  --color-brass-deep: var(--brass-deep);
+  --color-datum: var(--datum);
+  --color-datum-navy: var(--datum-navy);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-on-navy: var(--accent-on-navy);
+  --color-error: var(--error);
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --font-sans: var(--font-mona), ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-mona), ui-sans-serif, system-ui, sans-serif;
+
+  --radius-sm: 0rem;
+  --radius-md: 0rem;
+  --radius-lg: 0rem;
+  --radius-xl: 0rem;
+
+  --ease-lift: cubic-bezier(0.65, 0, 0.35, 1);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html {
+    @apply font-sans;
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+    font-kerning: normal;
+  }
+  body {
+    background: var(--travertine);
+    color: var(--graphite);
+    font-variation-settings: "wdth" 100;
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+  @media (min-width: 1024px) {
+    body {
+      font-size: 1.0625rem;
+    }
+  }
+  :focus-visible {
+    outline: 2px solid var(--brass-deep);
+    outline-offset: 3px;
+  }
+  .on-navy :focus-visible {
+    outline-color: var(--brass);
+  }
+  ::selection {
+    background: var(--brass);
+    color: var(--lacquer);
+  }
+  [id] {
+    scroll-margin-top: calc(var(--header-h) + 1rem);
+  }
+  @media (max-width: 1279px) {
+    .accent-beaumonte [id],
+    .accent-lalbaug [id] {
+      scroll-margin-top: calc(var(--header-h) + 4.5rem);
+    }
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* ---------------------------------------------------------------- */
+/* Type roles (Mona Sans width axis carries the concept)             */
+/* ---------------------------------------------------------------- */
+@layer components {
+  .t-display {
+    font-variation-settings: "wdth" 80;
+    font-weight: 300;
+    letter-spacing: -0.02em;
+    line-height: 0.98;
+    font-size: clamp(2.75rem, 1.6rem + 5.2vw, 6.5rem);
+    text-wrap: balance;
+  }
+  .t-numeral {
+    font-variation-settings: "wdth" 75;
+    font-weight: 300;
+    font-variant-numeric: tabular-nums lining-nums;
+    line-height: 0.9;
+    letter-spacing: -0.01em;
+  }
+  .t-h2 {
+    font-variation-settings: "wdth" 85;
+    font-weight: 350;
+    letter-spacing: -0.015em;
+    line-height: 1.05;
+    font-size: clamp(2rem, 1.4rem + 2.6vw, 3.5rem);
+    text-wrap: balance;
+  }
+  .t-h3 {
+    font-variation-settings: "wdth" 100;
+    font-weight: 500;
+    line-height: 1.2;
+    font-size: clamp(1.25rem, 1.1rem + 0.6vw, 1.6rem);
+    text-wrap: balance;
+  }
+  .t-lead {
+    font-variation-settings: "wdth" 100;
+    font-weight: 350;
+    font-size: clamp(1.125rem, 1.05rem + 0.35vw, 1.3rem);
+    line-height: 1.5;
+    text-wrap: pretty;
+  }
+  .t-body {
+    max-width: 66ch;
+    text-wrap: pretty;
+  }
+  .on-navy .t-body,
+  .on-navy .t-lead {
+    line-height: 1.7;
+  }
+  .t-label {
+    font-variation-settings: "wdth" 125;
+    font-weight: 500;
+    font-size: 0.72rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    line-height: 1.4;
+  }
+  .t-level {
+    font-variation-settings: "wdth" 75;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums lining-nums;
+    font-size: 0.875rem;
+    letter-spacing: 0.04em;
+  }
+
+  /* Layout frame */
+  .frame {
+    width: 100%;
+    max-width: 85rem;
+    margin-inline: auto;
+    padding-inline: 1rem;
+  }
+  @media (min-width: 640px) {
+    .frame {
+      padding-inline: 1.5rem;
+    }
+  }
+  @media (min-width: 1024px) {
+    .frame {
+      padding-inline: 2.5rem;
+    }
+  }
+  .section-y {
+    padding-block: clamp(4.5rem, 3rem + 6vw, 9rem);
+  }
+
+  /* Surfaces */
+  .on-navy {
+    background: var(--navy);
+    color: var(--ivory);
+  }
+  .on-lacquer {
+    background: var(--lacquer);
+    color: var(--ivory);
+  }
+  .on-navy,
+  .on-lacquer {
+    --border: var(--datum-navy);
+  }
+
+  /* Plaque: brass hairline frame with chamfered deco corners */
+  .plaque {
+    --chamfer: 10px;
+    position: relative;
+    padding: 1.25rem 1.5rem;
+    clip-path: polygon(
+      var(--chamfer) 0,
+      calc(100% - var(--chamfer)) 0,
+      100% var(--chamfer),
+      100% calc(100% - var(--chamfer)),
+      calc(100% - var(--chamfer)) 100%,
+      var(--chamfer) 100%,
+      0 calc(100% - var(--chamfer)),
+      0 var(--chamfer)
+    );
+    background:
+      linear-gradient(var(--plaque-line, var(--brass-deep)) 0 0) top / calc(100% - 2 * var(--chamfer)) 1px no-repeat,
+      linear-gradient(var(--plaque-line, var(--brass-deep)) 0 0) bottom / calc(100% - 2 * var(--chamfer)) 1px no-repeat,
+      linear-gradient(var(--plaque-line, var(--brass-deep)) 0 0) left / 1px calc(100% - 2 * var(--chamfer)) no-repeat,
+      linear-gradient(var(--plaque-line, var(--brass-deep)) 0 0) right / 1px calc(100% - 2 * var(--chamfer)) no-repeat,
+      linear-gradient(-45deg, transparent calc(50% - 0.5px), var(--plaque-line, var(--brass-deep)) calc(50% - 0.5px) calc(50% + 0.5px), transparent calc(50% + 0.5px)) top left / var(--chamfer) var(--chamfer) no-repeat,
+      linear-gradient(45deg, transparent calc(50% - 0.5px), var(--plaque-line, var(--brass-deep)) calc(50% - 0.5px) calc(50% + 0.5px), transparent calc(50% + 0.5px)) top right / var(--chamfer) var(--chamfer) no-repeat,
+      linear-gradient(45deg, transparent calc(50% - 0.5px), var(--plaque-line, var(--brass-deep)) calc(50% - 0.5px) calc(50% + 0.5px), transparent calc(50% + 0.5px)) bottom left / var(--chamfer) var(--chamfer) no-repeat,
+      linear-gradient(-45deg, transparent calc(50% - 0.5px), var(--plaque-line, var(--brass-deep)) calc(50% - 0.5px) calc(50% + 0.5px), transparent calc(50% + 0.5px)) bottom right / var(--chamfer) var(--chamfer) no-repeat,
+      var(--plaque-fill, transparent);
+  }
+  .on-navy .plaque,
+  .on-lacquer .plaque {
+    --plaque-line: var(--brass);
+  }
+
+  /* Datum line: full-width hairline with level marker */
+  .datum {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .datum::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: currentColor;
+    opacity: 0.35;
+  }
+
+  /* Brass rule that grows from the start on hover */
+  .rule-grow {
+    background-image: linear-gradient(var(--rule-color, var(--brass-deep)), var(--rule-color, var(--brass-deep)));
+    background-size: 0% 1px;
+    background-position: 0 100%;
+    background-repeat: no-repeat;
+    transition: background-size 280ms var(--ease-lift);
+  }
+  .rule-grow:hover,
+  .rule-grow:focus-visible,
+  .group:hover .rule-grow {
+    background-size: 100% 1px;
+  }
+  .on-navy .rule-grow,
+  .on-lacquer .rule-grow {
+    --rule-color: var(--brass);
+  }
+
+  /* Subtle lacquer grain on navy bands */
+  .grain {
+    position: relative;
+    isolation: isolate;
+  }
+  .grain::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0.06;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  }
+
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Project pages: leave room for the fixed lift index on wide screens */
+@media (min-width: 1280px) {
+  .accent-beaumonte .frame,
+  .accent-lalbaug .frame {
+    padding-inline-end: 6.5rem;
+  }
+}
+
+/* Keep the footer clear of the sticky mobile action bar on project pages */
+@media (max-width: 767px) {
+  body:has(.mobile-action-bar) > footer,
+  body:has(.mobile-action-bar) footer {
+    padding-bottom: calc(3.5rem + env(safe-area-inset-bottom));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
