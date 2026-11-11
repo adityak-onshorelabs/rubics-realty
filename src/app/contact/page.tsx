@@ -61,11 +61,11 @@ export default function ContactPage() {
       >
         <ul className="mt-14 grid border-t border-datum-navy lg:grid-cols-3 lg:divide-x lg:divide-datum-navy">
           {channels.map(({ label, value, note, href, Icon, numeral, external }) => (
-            <li key={label} className="border-b border-datum-navy lg:border-b-0">
+            <li key={label} className="border-b border-datum-navy lg:border-b-0 lg:[&:first-child>a]:ps-0 lg:[&:last-child>a]:pe-0">
               <a
                 href={href}
                 {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-                className="group flex h-full flex-col gap-3 py-7 transition-colors hover:bg-navy-2/40 lg:px-8 lg:first:ps-0"
+                className="group flex h-full flex-col gap-3 py-7 transition-colors hover:bg-navy-2/40 lg:px-8"
               >
                 <span className="t-label flex items-center gap-2 text-brass">
                   <Icon aria-hidden className="size-4" />
