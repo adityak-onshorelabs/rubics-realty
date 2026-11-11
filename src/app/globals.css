@@ -348,6 +348,14 @@
   }
 }
 
+/* Hide the browser's page scrollbar (scrolling still works; the lift shaft shows position on desktop) */
+html {
+  scrollbar-width: none;
+}
+html::-webkit-scrollbar {
+  display: none;
+}
+
 /* Lock page scroll while a modal dialog (mobile menu) is open */
 html:has(dialog[open]) {
   overflow: hidden;
