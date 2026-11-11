@@ -6,6 +6,7 @@ import { Header } from "@/components/site/header";
 import { Footer } from "@/components/site/footer";
 import { Providers } from "@/components/site/providers";
 import { FloorShaft } from "@/components/site/floor-rail";
+import { LiftDoors } from "@/components/site/lift-doors";
 import { JsonLd } from "@/components/site/json-ld";
 import "./globals.css";
 
@@ -81,6 +82,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           </main>
           <Footer />
           <FloorShaft />
+          <LiftDoors />
         </Providers>
         <JsonLd data={orgLd} />
       </body>
