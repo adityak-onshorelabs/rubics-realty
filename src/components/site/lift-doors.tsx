@@ -21,8 +21,10 @@ import { pressStories } from "@/content/press";
 type Phase = "idle" | "closing" | "closed" | "opening";
 
 const EASE = [0.65, 0, 0.35, 1] as const;
-const CLOSE_MS = 420;
-const OPEN_MS = 520;
+const CLOSE_MS = 650;
+const OPEN_MS = 800;
+/** Minimum time the doors stay shut, so the "Arriving" card can be read even when the next page is instant. */
+const MIN_HOLD_MS = 700;
 const FAILSAFE_MS = 8000;
 
 const labels: Record<string, string> = {
@@ -54,6 +56,7 @@ export function LiftDoors() {
   const pendingHref = useRef<string | null>(null);
   const phaseRef = useRef<Phase>("idle");
   const failsafe = useRef<number>(0);
+  const closedAt = useRef(0);
 
   const set = useCallback((p: Phase) => {
     phaseRef.current = p;
@@ -98,18 +101,24 @@ export function LiftDoors() {
     return () => document.removeEventListener("click", onClick, { capture: true });
   }, [set]);
 
-  // Open once the destination route has rendered (two frames so the new page paints behind the doors).
+  // Open once the destination route has rendered (two frames so the new page paints behind the doors)
+  // and the minimum hold has passed.
   useEffect(() => {
-    if (phaseRef.current !== "closed" && phaseRef.current !== "closing") return;
+    if (phaseRef.current !== "closed") return;
     if (target.current && pathname !== target.current) return;
+    let id1 = 0;
     let id2 = 0;
-    const id1 = requestAnimationFrame(() => {
-      id2 = requestAnimationFrame(() => {
-        window.clearTimeout(failsafe.current);
-        set("opening");
+    const wait = Math.max(0, MIN_HOLD_MS - (performance.now() - closedAt.current));
+    const t = window.setTimeout(() => {
+      id1 = requestAnimationFrame(() => {
+        id2 = requestAnimationFrame(() => {
+          window.clearTimeout(failsafe.current);
+          set("opening");
+        });
       });
-    });
+    }, wait);
     return () => {
+      window.clearTimeout(t);
       cancelAnimationFrame(id1);
       cancelAnimationFrame(id2);
     };
@@ -138,6 +147,7 @@ export function LiftDoors() {
                   if (phaseRef.current === "closing" && pendingHref.current) {
                     const href = pendingHref.current;
                     pendingHref.current = null;
+                    closedAt.current = performance.now();
                     set("closed");
                     router.push(href);
                   } else if (phaseRef.current === "opening") {
@@ -156,7 +166,7 @@ export function LiftDoors() {
               className="absolute inset-0 flex flex-col items-center justify-center gap-6 text-center"
               initial={{ opacity: 0 }}
               animate={{ opacity: shut ? 1 : 0 }}
-              transition={{ duration: shut ? 0.25 : 0.15, delay: shut ? 0.22 : 0 }}
+              transition={{ duration: shut ? 0.35 : 0.2, delay: shut ? 0.4 : 0 }}
             >
               <Image src={images.logo.src} alt="" width={154} height={32} className="h-8 w-auto" style={{ width: "auto" }} />
               <span className="relative block h-12 w-px overflow-hidden bg-datum-navy">
