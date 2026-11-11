@@ -2,7 +2,7 @@ import { ButtonLink } from "@/components/site/button-link";
 
 export default function NotFound() {
   return (
-    <section data-level="L404" className="on-lacquer grain">
+    <section data-level="L404" data-label="Not found" className="on-lacquer grain">
       <div className="frame flex min-h-[70svh] flex-col justify-center py-24">
         <p className="t-numeral text-[clamp(6rem,4rem+10vw,12rem)] text-brass" aria-hidden>
           404

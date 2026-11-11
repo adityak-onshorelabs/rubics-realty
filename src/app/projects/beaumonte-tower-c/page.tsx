@@ -65,7 +65,7 @@ export default function BeauMontePage() {
   return (
     <div className="accent-beaumonte">
       {/* L00 Overview / hero */}
-      <section id="overview" data-level="L00" aria-labelledby="bm-title" tabIndex={-1} className="on-lacquer relative isolate overflow-hidden outline-none">
+      <section id="overview" data-level="L00" data-label="Overview" aria-labelledby="bm-title" tabIndex={-1} className="on-lacquer relative isolate overflow-hidden outline-none">
         <div className="absolute inset-0 -z-10">
           <Image
             src={images.beaumonteLobby.src}

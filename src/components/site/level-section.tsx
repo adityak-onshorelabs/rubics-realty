@@ -38,6 +38,7 @@ export function LevelSection({
     <section
       id={id}
       data-level={level}
+      data-label={label ?? ariaLabel}
       aria-label={ariaLabel}
       tabIndex={id ? -1 : undefined}
       className={cn(toneClass[tone], "relative outline-none", !bare && "section-y", className)}

@@ -16,7 +16,7 @@ export function PageHeader({
   children?: ReactNode;
 }) {
   return (
-    <section data-level={level} className="on-lacquer grain">
+    <section data-level={level} data-label={label.split(" · ")[0]} className="on-lacquer grain">
       <div className="frame pb-16 pt-14 lg:pb-24 lg:pt-20">
         <DatumLine level={level} label={label} />
         <div className="mt-10 grid gap-8 lg:grid-cols-12">

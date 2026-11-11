@@ -14,7 +14,7 @@ export function HomeHero() {
   } = getImageProps({ ...common, src: images.heroPosterMobile.src, width: 600, height: 900, quality: 75 });
   const { props: desktopImg } = getImageProps({ ...common, src: images.heroPoster.src, width: 1600, height: 900, quality: 75 });
   return (
-    <section data-level="L00" aria-labelledby="hero-title" className="on-lacquer relative isolate overflow-hidden">
+    <section data-level="L00" data-label="Arrival" aria-labelledby="hero-title" className="on-lacquer relative isolate overflow-hidden">
       {/* Mobile: film fills the top of the screen and dissolves into lacquer; text sits on solid navy below.
           Desktop: film is full-bleed with scrims from the bottom and the start edge. */}
       <div className="absolute inset-x-0 top-0 -z-10 h-[62svh] md:inset-0 md:h-auto">

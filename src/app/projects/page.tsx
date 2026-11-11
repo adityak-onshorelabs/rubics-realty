@@ -19,7 +19,7 @@ export default function ProjectsPage() {
         title="Addresses."
         lede="Mumbai neighbourhoods with long memories. One tower now selling, one rising soon."
       />
-      <section data-level="L01" className="on-navy grain section-y !pt-10">
+      <section data-level="L01" data-label="Directory" className="on-navy grain section-y !pt-10">
         <DirectoryBoard projects={projects} filter />
       </section>
       {/* TODO(client): add completed and landmark projects here once attribution wording is approved. */}

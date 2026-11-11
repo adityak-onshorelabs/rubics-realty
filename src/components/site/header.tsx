@@ -7,7 +7,6 @@ import { useEffect, useRef } from "react";
 import { Menu, X } from "lucide-react";
 import { company, images, nav } from "@/content/en";
 import { cn } from "@/lib/utils";
-import { FloorReadout } from "./floor-readout";
 
 export function Header() {
   const pathname = usePathname();
@@ -51,7 +50,6 @@ export function Header() {
           </ul>
         </nav>
 
-        <FloorReadout />
 
         <a
           href={company.salesPhone.href}

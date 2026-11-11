@@ -348,6 +348,11 @@
   }
 }
 
+/* Lock page scroll while a modal dialog (mobile menu) is open */
+html:has(dialog[open]) {
+  overflow: hidden;
+}
+
 /* Project pages: leave room for the fixed lift index on wide screens */
 @media (min-width: 1280px) {
   .accent-beaumonte .frame,
