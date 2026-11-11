@@ -76,6 +76,8 @@ export type PressStory = {
   title: string;
   category: "real-estate" | "group";
   date: string;
+  /** Cover image from the old media page. */
+  image: ImageAsset;
   outlets: string[];
   summary: string;
   body: string[];

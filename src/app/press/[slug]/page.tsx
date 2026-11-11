@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
@@ -19,7 +20,11 @@ export async function generateMetadata({ params }: PageProps<"/press/[slug]">): 
     title: story.title,
     description: story.summary.slice(0, 160),
     alternates: { canonical: `/press/${story.slug}` },
-    openGraph: { type: "article", publishedTime: story.date },
+    openGraph: {
+      type: "article",
+      publishedTime: story.date,
+      images: [{ url: story.image.src, width: story.image.width, height: story.image.height, alt: story.image.alt }],
+    },
   };
 }
 
@@ -48,6 +53,17 @@ export default async function PressStoryPage({ params }: PageProps<"/press/[slug
           </ul>
         </aside>
         <div className="lg:col-span-8 lg:col-start-5">
+          <figure className="mb-10" style={{ maxWidth: story.image.width }}>
+            <Image
+              src={story.image.src}
+              alt={story.image.alt}
+              width={story.image.width}
+              height={story.image.height}
+              sizes="(min-width: 1024px) 50vw, 92vw"
+              loading="eager"
+              className="h-auto w-full bg-lacquer"
+            />
+          </figure>
           {/* Excerpt only: some items are third-party journalism, not Rubics releases. TODO(client): add original article links. */}
           {story.body.slice(0, 3).map((p, i) => (
             <p key={i} className={i === 0 ? "t-lead" : "t-body mt-5 text-graphite-muted"}>
@@ -64,6 +80,7 @@ export default async function PressStoryPage({ params }: PageProps<"/press/[slug
           "@context": "https://schema.org",
           "@type": "NewsArticle",
           headline: story.title,
+          image: absoluteUrl(story.image.src),
           datePublished: story.date,
           url: absoluteUrl(`/press/${story.slug}`),
           publisher: { "@id": absoluteUrl("/#organization") },
