@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { ArrowUpRight, Mail, MapPin, MessageCircle, Phone } from "lucide-react";
 import { company, offices } from "@/content/en";
 import { EnquiryForm } from "@/components/site/enquiry-form";
 import { LevelSection } from "@/components/site/level-section";
@@ -12,78 +13,160 @@ export const metadata: Metadata = {
   alternates: { canonical: "/contact" },
 };
 
+const directions = (q: string) => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}`;
+
 export default function ContactPage() {
+  const [salesCentre, ...otherOffices] = offices;
+
+  const channels = [
+    {
+      label: "Call sales",
+      value: company.salesPhone.display,
+      note: "Toll-free in India",
+      href: company.salesPhone.href,
+      Icon: Phone,
+      numeral: true,
+      external: false,
+    },
+    ...(company.whatsapp
+      ? [{ label: "WhatsApp", value: company.whatsapp.display, note: "Chat with the sales team", href: company.whatsapp.href, Icon: MessageCircle, numeral: true, external: true }]
+      : []),
+    {
+      label: "Write",
+      value: company.salesEmail,
+      note: "Sales and brochure requests",
+      href: `mailto:${company.salesEmail}`,
+      Icon: Mail,
+      numeral: false,
+      external: false,
+    },
+    {
+      label: "Visit",
+      value: "Sion Circle, Sion East",
+      note: "Sales Experience Centre",
+      href: directions(salesCentre.mapQuery),
+      Icon: MapPin,
+      numeral: false,
+      external: true,
+    },
+  ];
+
   return (
     <>
       <PageHeader
         level="L00"
         label="Contact"
         title="Come and see."
-        lede={
-          <>
-            <a href={company.salesPhone.href} className="t-numeral block text-6xl text-brass">
-              {company.salesPhone.display}
-            </a>
-            <a href={`mailto:${company.salesEmail}`} className="mt-3 inline-block underline-offset-4 hover:underline">
-              {company.salesEmail}
-            </a>
-          </>
-        }
-      />
+        lede="Call the sales team, write to us, or walk into the Sales Experience Centre at Sion Circle."
+      >
+        <ul className="mt-14 grid border-t border-datum-navy lg:grid-cols-3 lg:divide-x lg:divide-datum-navy">
+          {channels.map(({ label, value, note, href, Icon, numeral, external }) => (
+            <li key={label} className="border-b border-datum-navy lg:border-b-0">
+              <a
+                href={href}
+                {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                className="group flex h-full flex-col gap-3 py-7 transition-colors hover:bg-navy-2/40 lg:px-8 lg:first:ps-0"
+              >
+                <span className="t-label flex items-center gap-2 text-brass">
+                  <Icon aria-hidden className="size-4" />
+                  {label}
+                  <ArrowUpRight
+                    aria-hidden
+                    className="ms-auto size-4 text-ivory-muted transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+                  />
+                </span>
+                <span className={numeral ? "t-numeral text-5xl text-ivory" : "t-h3 font-normal text-ivory"}>{value}</span>
+                <span className="text-sm text-ivory-muted">
+                  {note}
+                  {external ? <span className="sr-only"> (opens in a new tab)</span> : null}
+                </span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </PageHeader>
 
-      <LevelSection level="L01" label="Where we are">
-        <div className="frame grid gap-12 lg:grid-cols-12">
-          <div className="grid gap-10 sm:grid-cols-2 lg:col-span-6 lg:grid-cols-1">
-            {offices.map((o) => (
-              <address key={o.label} className="border-t border-datum pt-5 not-italic">
-                <p className="t-label text-brass-deep">{o.label}</p>
-                <p className="mt-3">
-                  {o.lines.map((l) => (
+      <LevelSection id="visit" level="L01" label="Enquire">
+        <div className="frame grid gap-16 lg:grid-cols-12 lg:gap-12">
+          {/* Form first: it is the main job of this page */}
+          <div className="lg:col-span-7">
+            <h2 className="t-h2 max-w-[16ch]">Tell us what you are looking for.</h2>
+            <p className="t-body mt-4 text-graphite-muted">
+              Book a visit, ask for the brochure, or request a call back. The sales team will be in touch.
+            </p>
+            <div className="mt-10">
+              <Suspense fallback={<div className="h-[48rem]" aria-hidden />}>
+                <EnquiryForm />
+              </Suspense>
+            </div>
+          </div>
+
+          {/* Places: sticky on desktop */}
+          <aside aria-label="Our addresses" className="lg:col-span-4 lg:col-start-9">
+            <div className="grid gap-10 lg:sticky lg:top-[calc(var(--header-h)+2rem)]">
+              <div className="on-lacquer grain p-6 sm:p-8">
+                <p className="t-label text-brass">{salesCentre.label}</p>
+                <p className="t-h3 mt-3 text-ivory">Sion Circle, Sion East</p>
+                <address className="mt-3 text-sm not-italic text-ivory-muted">
+                  {salesCentre.lines.map((l) => (
                     <span key={l} className="block">
                       {l}
                     </span>
                   ))}
-                </p>
-                <a
-                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(o.mapQuery)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="t-label rule-grow mt-3 inline-flex min-h-11 items-center pb-0.5"
-                >
-                  Directions<span className="sr-only"> to {o.label} (opens Google Maps in a new tab)</span>
-                </a>
-              </address>
-            ))}
-            <div className="border-t border-datum pt-5">
-              <p className="t-label text-brass-deep">Office line</p>
-              <a href={company.officePhone.href} className="mt-3 block">
-                {company.officePhone.display}
-              </a>
-              <a href={`mailto:${company.generalEmail}`} className="mt-1 block">
-                {company.generalEmail}
-              </a>
-            </div>
-          </div>
-          <div className="lg:col-span-5 lg:col-start-8">
-            <MapOnRequest query={offices[0].mapQuery} label={offices[0].label}>
-              <div className="plaque">
-                <p className="t-label text-brass-deep">{offices[0].label}</p>
-                <p className="t-h3 mt-3">Sion Circle, Sion East</p>
-                <p className="t-body mt-2 text-graphite-muted">Near PVR Cinema, opposite the Croma showroom. Three minutes from the Eastern Express Highway.</p>
+                </address>
+                <p className="mt-4 text-sm text-ivory-muted">Three minutes from the Eastern Express Highway.</p>
+                <div className="mt-6">
+                  <MapOnRequest query={salesCentre.mapQuery} label={salesCentre.label}>
+                    <a
+                      href={directions(salesCentre.mapQuery)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="t-label inline-flex min-h-[52px] items-center gap-3 bg-ivory px-6 text-lacquer hover:bg-travertine-2"
+                    >
+                      Get directions <ArrowUpRight aria-hidden className="size-4" />
+                      <span className="sr-only"> (opens Google Maps in a new tab)</span>
+                    </a>
+                  </MapOnRequest>
+                </div>
               </div>
-            </MapOnRequest>
-          </div>
-        </div>
-      </LevelSection>
 
-      <LevelSection id="visit" level="L02" label="Enquire" tone="travertine-2">
-        <div className="frame grid gap-12 lg:grid-cols-12">
-          <h2 className="t-h2 lg:col-span-4">Tell us what you are looking for.</h2>
-          <div className="lg:col-span-7 lg:col-start-6">
-            <Suspense fallback={<div className="h-[48rem]" aria-hidden />}>
-              <EnquiryForm />
-            </Suspense>
-          </div>
+              <dl className="border-t border-datum">
+                {otherOffices.map((o) => (
+                  <div key={o.label} className="border-b border-datum py-5">
+                    <dt className="t-label text-brass-deep">{o.label}</dt>
+                    <dd className="mt-2 text-sm">
+                      <address className="not-italic">
+                        {o.lines.map((l) => (
+                          <span key={l} className="block">
+                            {l}
+                          </span>
+                        ))}
+                      </address>
+                      <a
+                        href={directions(o.mapQuery)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="t-label rule-grow mt-2 inline-flex min-h-11 items-center pb-0.5"
+                      >
+                        Directions<span className="sr-only"> to {o.label} (opens Google Maps in a new tab)</span>
+                      </a>
+                    </dd>
+                  </div>
+                ))}
+                <div className="border-b border-datum py-5">
+                  <dt className="t-label text-brass-deep">Office line</dt>
+                  <dd className="mt-2 grid gap-1 text-sm">
+                    <a href={company.officePhone.href} className="w-fit underline-offset-4 hover:underline">
+                      {company.officePhone.display}
+                    </a>
+                    <a href={`mailto:${company.generalEmail}`} className="w-fit underline-offset-4 hover:underline">
+                      {company.generalEmail}
+                    </a>
+                  </dd>
+                </div>
+              </dl>
+            </div>
+          </aside>
         </div>
       </LevelSection>
     </>
