@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import { Suspense } from "react";
 import { getProject, images } from "@/content/en";
 import { EnquiryForm } from "@/components/site/enquiry-form";
 import { LevelSection } from "@/components/site/level-section";
 import { PageHeader } from "@/components/site/page-header";
+import { Plate } from "@/components/site/plate";
+import { Reveal, SplitText } from "@/components/site/reveal";
 
 const project = getProject("lalbaug")!;
 
@@ -22,30 +23,51 @@ export default function LalbaugPage() {
 
       <LevelSection level="L01" label="The first sketch">
         <div className="frame grid gap-12 lg:grid-cols-12">
-          <figure className="lg:col-span-7">
-            <div className="relative aspect-[1212/704] bg-travertine">
-              <Image src={images.lalbaugSketch.src} alt={images.lalbaugSketch.alt} fill sizes="(min-width: 1024px) 55vw, 92vw" className="object-contain mix-blend-multiply" />
-            </div>
-            <figcaption className="t-label mt-3 text-graphite-muted">Concept sketch. Design subject to approvals.</figcaption>
-          </figure>
+          <Plate
+            className="lg:col-span-7"
+            image={images.lalbaugSketch}
+            no="01"
+            caption="Concept sketch. Design subject to approvals."
+            sizes="(min-width: 1024px) 55vw, 92vw"
+            contain
+            frameClassName="aspect-[1212/704] max-h-[calc(100svh-var(--header-h)-9rem)] w-full"
+          />
           <div className="lg:col-span-4 lg:col-start-9">
-            <h2 className="t-h2">A future landmark, built to compel.</h2>
-            <p className="t-body mt-6 text-graphite-muted">{project.summary}</p>
-            <p className="t-body mt-4 text-graphite-muted">
-              Details, configurations and registration will be published here at launch. Leave your number and we will call you first.
-            </p>
+            <h2 className="t-h2">
+              <SplitText>A future landmark, built to compel.</SplitText>
+            </h2>
+            <Reveal delay={150}>
+              <p className="t-body mt-6 text-graphite-muted">{project.summary}</p>
+              <p className="t-body mt-4 text-graphite-muted">
+                Details, configurations and registration will be published here at launch. Leave your number and we will call you first.
+              </p>
+            </Reveal>
+            <Reveal delay={300} className="mt-8">
+              <dl className="tblock grid-cols-2 [&>*:first-child]:!ps-0">
+                <div>
+                  <dt className="t-note text-graphite-muted">Status</dt>
+                  <dd className="t-label mt-1.5 text-accent-ink">{project.statusLabel}</dd>
+                </div>
+                <div>
+                  <dt className="t-note text-graphite-muted">MahaRERA</dt>
+                  <dd className="mt-1 text-sm">Details on launch</dd>
+                </div>
+              </dl>
+            </Reveal>
           </div>
         </div>
       </LevelSection>
 
       <LevelSection id="visit" level="L02" label="Register interest" tone="travertine-2">
         <div className="frame grid gap-12 lg:grid-cols-12">
-          <h2 className="t-h2 lg:col-span-4">Hear about Lalbaug first.</h2>
-          <div className="lg:col-span-7 lg:col-start-6">
+          <h2 className="t-h2 lg:col-span-4">
+            <SplitText>Hear about Lalbaug first.</SplitText>
+          </h2>
+          <Reveal delay={200} className="lg:col-span-7 lg:col-start-6">
             <Suspense fallback={<div className="h-[36rem]" aria-hidden />}>
               <EnquiryForm project={project.slug} projectName="the Lalbaug residence" options={["callback"]} showConfig={false} />
             </Suspense>
-          </div>
+          </Reveal>
         </div>
         <p className="frame mt-16 text-xs text-graphite-muted">
           This page is for information only and does not constitute an offer. Project details will be shared after registration with MahaRERA.

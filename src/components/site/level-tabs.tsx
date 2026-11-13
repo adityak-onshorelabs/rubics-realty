@@ -50,7 +50,7 @@ export function LevelTabs({
       <div
         role="tablist"
         aria-label={label}
-        className={cn("no-scrollbar -mx-1 flex overflow-x-auto border-b border-border px-1", className)}
+        className={cn("no-scrollbar scroll-hint -mx-1 flex overflow-x-auto border-b border-border px-1", className)}
       >
         {tabs.map((tab, i) => {
           const selected = tab.id === active;

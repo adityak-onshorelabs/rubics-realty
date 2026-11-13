@@ -1,12 +1,9 @@
 "use client";
 
 /**
- * Lift-button section index for project pages.
- * Adapted from Watermelon `vertical-tooltip-navbar` (reference/watermelon/vertical-tooltip-navbar.tsx).
- * Changes: icon buttons -> round brass lift buttons carrying level codes; the label reveal keeps the demo's
- * clip-path idea but is pure CSS (hover + focus-visible), no measured offsets or timers; buttons are real
- * links to section ids with aria-current for the section in view (IntersectionObserver, native scroll);
- * on small screens it becomes a horizontal chip track under the header.
+ * Section index for project pages below 1024px: a horizontal chip track of level codes under the header,
+ * with aria-current for the section in view (IntersectionObserver, native scroll). From 1024px the lift
+ * shaft (floor-rail.tsx) is the page's vertical navigation, so the old right-hand lift panel is gone.
  */
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
@@ -17,7 +14,10 @@ export function LiftIndex({ stops }: { stops: LiftStop[] }) {
   const [active, setActive] = useState(stops[0]?.id);
 
   useEffect(() => {
-    const els = stops.map((s) => document.getElementById(s.id)).filter(Boolean) as HTMLElement[];
+    // Next keeps previous routes mounted but hidden, so ids can repeat: take the rendered one.
+    const els = stops
+      .map((s) => Array.from(document.querySelectorAll<HTMLElement>(`[id="${s.id}"]`)).find((el) => el.getClientRects().length > 0))
+      .filter(Boolean) as HTMLElement[];
     const io = new IntersectionObserver(
       (entries) => {
         const hit = entries.filter((e) => e.isIntersecting).sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)[0];
@@ -29,43 +29,14 @@ export function LiftIndex({ stops }: { stops: LiftStop[] }) {
     return () => io.disconnect();
   }, [stops]);
 
+  // Below 1024px: horizontal track under the header (from 1024px the lift shaft on the left takes over).
+  // Follows the header when it tucks away on scroll.
   return (
-    <>
-      {/* Desktop: vertical lift panel */}
-      <nav aria-label="On this page" className="fixed end-5 top-1/2 z-30 hidden -translate-y-1/2 xl:block">
-        <ol className="on-lacquer flex flex-col-reverse gap-1.5 border border-datum-navy p-2">
-          {stops.map((s) => {
-            const isActive = s.id === active;
-            return (
-              <li key={s.id} className="group relative">
-                <a
-                  href={`#${s.id}`}
-                  aria-current={isActive ? "location" : undefined}
-                  className={cn(
-                    "t-level flex size-11 items-center justify-center rounded-full border text-[0.7rem] transition-colors",
-                    isActive
-                      ? "border-brass bg-brass text-lacquer"
-                      : "border-datum-navy text-ivory-muted hover:border-brass hover:text-brass",
-                  )}
-                >
-                  {s.code}
-                  <span className="sr-only">: {s.label}</span>
-                </a>
-                <span
-                  aria-hidden
-                  className="t-label pointer-events-none absolute end-[calc(100%+0.85rem)] top-1/2 -translate-y-1/2 whitespace-nowrap bg-lacquer px-3 py-2 text-ivory [clip-path:inset(0_0_0_100%)] transition-[clip-path] duration-200 ease-[var(--ease-lift)] group-hover:[clip-path:inset(0)] group-has-[:focus-visible]:[clip-path:inset(0)]"
-                >
-                  {s.label}
-                </span>
-              </li>
-            );
-          })}
-        </ol>
-      </nav>
-
-      {/* Mobile/tablet: horizontal track */}
-      <nav aria-label="On this page" className="on-lacquer sticky top-[var(--header-h)] z-30 border-b border-datum-navy xl:hidden">
-        <ol className="no-scrollbar frame flex gap-1 overflow-x-auto py-2">
+      <nav
+        aria-label="On this page"
+        className="on-lacquer sticky top-[var(--header-h)] z-30 border-b border-datum-navy transition-transform duration-500 ease-[var(--ease-out-expo)] [transform:translateY(var(--header-shift))] lg:hidden"
+      >
+        <ol className="no-scrollbar scroll-hint frame flex gap-1 overflow-x-auto py-2" data-lenis-prevent>
           {stops.map((s) => (
             <li key={s.id} className="shrink-0">
               <a
@@ -83,6 +54,5 @@ export function LiftIndex({ stops }: { stops: LiftStop[] }) {
           ))}
         </ol>
       </nav>
-    </>
   );
 }

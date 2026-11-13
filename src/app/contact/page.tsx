@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
+import { Suspense, type CSSProperties } from "react";
 import { ArrowUpRight, Mail, MapPin, MessageCircle, Phone } from "lucide-react";
 import { company, offices } from "@/content/en";
 import { EnquiryForm } from "@/components/site/enquiry-form";
 import { LevelSection } from "@/components/site/level-section";
 import { MapOnRequest } from "@/components/site/map-on-request";
 import { PageHeader } from "@/components/site/page-header";
+import { Reveal, SplitText } from "@/components/site/reveal";
 
 export const metadata: Metadata = {
   title: "Contact | Sales Experience Centre, Sion Circle",
@@ -59,9 +60,9 @@ export default function ContactPage() {
         title="Come and see."
         lede="Call the sales team, write to us, or walk into the Sales Experience Centre at Sion Circle."
       >
-        <ul className="mt-14 grid border-t border-datum-navy lg:grid-cols-3 lg:divide-x lg:divide-datum-navy">
-          {channels.map(({ label, value, note, href, Icon, numeral, external }) => (
-            <li key={label} className="border-b border-datum-navy lg:border-b-0 lg:[&:first-child>a]:ps-0 lg:[&:last-child>a]:pe-0">
+        <ul suppressHydrationWarning data-reveal="stagger" style={{ ["--d" as string]: "400ms" } as CSSProperties} className="mt-12 grid border-t border-datum-navy lg:mt-14 lg:grid-cols-3 lg:divide-x lg:divide-datum-navy">
+          {channels.map(({ label, value, note, href, Icon, numeral, external }, i) => (
+            <li key={label} style={{ ["--i" as string]: i } as CSSProperties} className="border-b border-datum-navy lg:border-b-0 lg:[&:first-child>a]:ps-0 lg:[&:last-child>a]:pe-0">
               <a
                 href={href}
                 {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
@@ -86,19 +87,23 @@ export default function ContactPage() {
         </ul>
       </PageHeader>
 
-      <LevelSection id="visit" level="L01" label="Enquire">
+      <LevelSection id="visit" level="L01" label="Enquire" meta="Visits, brochures, call backs">
         <div className="frame grid gap-16 lg:grid-cols-12 lg:gap-12">
           {/* Form first: it is the main job of this page */}
           <div className="lg:col-span-7">
-            <h2 className="t-h2 max-w-[16ch]">Tell us what you are looking for.</h2>
-            <p className="t-body mt-4 text-graphite-muted">
-              Book a visit, ask for the brochure, or request a call back. The sales team will be in touch.
-            </p>
-            <div className="mt-10">
+            <h2 className="t-h2 max-w-[16ch]">
+              <SplitText>Tell us what you are looking for.</SplitText>
+            </h2>
+            <Reveal delay={150}>
+              <p className="t-body mt-4 text-graphite-muted">
+                Book a visit, ask for the brochure, or request a call back. The sales team will be in touch.
+              </p>
+            </Reveal>
+            <Reveal delay={250} className="mt-10">
               <Suspense fallback={<div className="h-[48rem]" aria-hidden />}>
                 <EnquiryForm />
               </Suspense>
-            </div>
+            </Reveal>
           </div>
 
           {/* Places: sticky on desktop */}
@@ -156,10 +161,10 @@ export default function ContactPage() {
                 <div className="border-b border-datum py-5">
                   <dt className="t-label text-brass-deep">Office line</dt>
                   <dd className="mt-2 grid gap-1 text-sm">
-                    <a href={company.officePhone.href} className="w-fit underline-offset-4 hover:underline">
+                    <a href={company.officePhone.href} className="inline-flex min-h-11 w-fit items-center underline-offset-4 hover:underline">
                       {company.officePhone.display}
                     </a>
-                    <a href={`mailto:${company.generalEmail}`} className="w-fit underline-offset-4 hover:underline">
+                    <a href={`mailto:${company.generalEmail}`} className="inline-flex min-h-11 w-fit items-center underline-offset-4 hover:underline">
                       {company.generalEmail}
                     </a>
                   </dd>

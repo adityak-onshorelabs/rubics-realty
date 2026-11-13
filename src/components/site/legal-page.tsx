@@ -5,6 +5,7 @@ export function LegalPage({ title, label, sections, children }: { title: string;
   return (
     <>
       <PageHeader level="L00" label={label} title={title} />
+      <div className="stone">
       <div className="frame section-y grid lg:grid-cols-12">
         <div className="lg:col-span-8 lg:col-start-3">
           {children}
@@ -25,6 +26,7 @@ export function LegalPage({ title, label, sections, children }: { title: string;
             </section>
           ))}
         </div>
+      </div>
       </div>
     </>
   );

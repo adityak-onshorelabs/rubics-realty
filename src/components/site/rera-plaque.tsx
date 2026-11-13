@@ -15,7 +15,7 @@ export function ReraPlaque({ project, className }: { project: Project; className
           href={project.rera.url}
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-1 inline-flex min-h-6 items-center text-xs text-ivory-muted underline underline-offset-4 hover:text-ivory"
+          className="inline-flex min-h-11 items-center text-xs text-ivory-muted underline underline-offset-4 hover:text-ivory"
         >
           Verify on maharera.maharashtra.gov.in<span className="sr-only"> (opens in a new tab)</span>
         </a>

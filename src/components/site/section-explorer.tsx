@@ -13,9 +13,9 @@
  * - Data from content (old site's Tower Specifications and RERA carpet tables). Nothing invented: Level 7
  *   is shown as "details on request" because no published source describes it.
  */
-import { useCallback, useId, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent } from "react";
+import { useCallback, useEffect, useId, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent } from "react";
 import Link from "next/link";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, Hand, MousePointerClick } from "lucide-react";
 import type { ExplorerLevel, UnitTable } from "@/content/types";
 import { formatArea } from "@/lib/site";
 import { cn } from "@/lib/utils";
@@ -40,6 +40,9 @@ function shape(level: number) {
   return { x: 74, w: 102 };
 }
 
+/** Short names for the stop buttons (the full band name shows in the readout). */
+const stopName: Partial<Record<ExplorerLevel["kind"], string>> = { terrace: "Crown", residential: "Residences", amenity: "E-Deck" };
+
 export function SectionExplorer({
   levels,
   tables,
@@ -53,8 +56,79 @@ export function SectionExplorer({
 }) {
   const [level, setLevel] = useState(initial);
   const [dragging, setDragging] = useState(false);
+  // Discoverability: the lift demonstrates itself once, and the carriage carries a drag cue until the visitor
+  // has used any control (drag, tap, key or stop button).
+  const [touched, setTouched] = useState(false);
+  const [riding, setRiding] = useState(false);
+  const [hovered, setHovered] = useState<number | null>(null);
   const shaftRef = useRef<HTMLDivElement>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const rideRaf = useRef(0);
+  const levelRef = useRef(level);
+  useEffect(() => {
+    levelRef.current = level;
+  }, [level]);
   const titleId = useId();
+
+  const stopRide = useCallback(() => {
+    cancelAnimationFrame(rideRaf.current);
+    rideRaf.current = 0;
+    setRiding(false);
+  }, []);
+
+  /** Ride the lift to a level floor by floor (eased), so jumps read as travel rather than a cut. */
+  const rideTo = useCallback(
+    (to: number, from?: number) => {
+      cancelAnimationFrame(rideRaf.current);
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        setLevel(to);
+        return;
+      }
+      let start = 0;
+      const origin = from ?? levelRef.current;
+      setLevel(origin);
+      setRiding(true);
+      const dist = Math.abs(to - origin) || 1;
+      const ms = Math.min(1400, 260 + dist * 34);
+      const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+      const frame = (now: number) => {
+        if (!start) start = now;
+        const t = Math.min(1, (now - start) / ms);
+        setLevel(Math.round(origin + (to - origin) * ease(t)));
+        if (t < 1) rideRaf.current = requestAnimationFrame(frame);
+        else {
+          rideRaf.current = 0;
+          setRiding(false);
+        }
+      };
+      rideRaf.current = requestAnimationFrame(frame);
+    },
+    [],
+  );
+
+  const touch = useCallback(() => {
+    setTouched(true);
+    stopRide();
+  }, [stopRide]);
+
+  // First time the explorer is properly in view: ride up from the ground to the starting floor.
+  useEffect(() => {
+    const el = rootRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      ([e]) => {
+        if (!e.isIntersecting) return;
+        io.disconnect();
+        rideTo(initial, 0);
+      },
+      { threshold: 0.45 },
+    );
+    io.observe(el);
+    return () => {
+      io.disconnect();
+      cancelAnimationFrame(rideRaf.current);
+    };
+  }, [initial, rideTo]);
 
   const band = useMemo(() => levels.find((b) => level >= b.from && level <= b.to)!, [levels, level]);
   const table = band.unitTableId ? tables.find((t) => t.id === band.unitTableId) : undefined;
@@ -71,6 +145,7 @@ export function SectionExplorer({
   }, []);
 
   const onPointerDown = (e: PointerEvent<HTMLDivElement>) => {
+    touch();
     e.currentTarget.setPointerCapture(e.pointerId);
     setDragging(true);
     const l = levelFromClientY(e.clientY);
@@ -85,6 +160,7 @@ export function SectionExplorer({
 
   const onKey = (e: KeyboardEvent<HTMLDivElement>) => {
     const step: Record<string, number> = { ArrowUp: 1, ArrowRight: 1, ArrowDown: -1, ArrowLeft: -1, PageUp: 5, PageDown: -5 };
+    if (e.key in step || e.key === "Home" || e.key === "End") touch();
     if (e.key in step) {
       e.preventDefault();
       setLevel((l) => clamp(l + step[e.key]));
@@ -102,10 +178,14 @@ export function SectionExplorer({
   const enquireHref = `?level=${level}#visit`;
 
   return (
-    <div className="grid gap-10 lg:grid-cols-12 lg:gap-12">
+    <div ref={rootRef} className="grid gap-10 lg:grid-cols-12 lg:gap-12">
       {/* Drawing + lift shaft */}
       <div className="lg:col-span-5">
-        <div className="relative mx-auto aspect-[260/476] w-full max-w-[22rem]" style={{ aspectRatio: `${W} / ${H}` }}>
+        {/* Width follows the viewport height too, so the whole tower fits on a short laptop screen */}
+        <div
+          className="relative mx-auto w-full max-w-[min(22rem,calc((100svh-var(--header-h)-8rem)*0.565))] max-lg:max-w-[22rem]"
+          style={{ aspectRatio: `${W} / ${H}` }}
+        >
           <svg viewBox={`0 0 ${W} ${H}`} className="absolute inset-0 h-full w-full" aria-hidden>
             {/* level labels every 5 floors */}
             {[41, 35, 30, 25, 20, 15, 10, 6].map((l) => (
@@ -127,7 +207,16 @@ export function SectionExplorer({
               const inBand = b === band;
               const isSel = l === level;
               return (
-                <g key={l} onClick={() => setLevel(l)} className="cursor-pointer">
+                <g
+                  key={l}
+                  onClick={() => {
+                    touch();
+                    setLevel(l);
+                  }}
+                  onPointerEnter={(e) => e.pointerType === "mouse" && setHovered(l)}
+                  onPointerLeave={() => setHovered(null)}
+                  className="cursor-pointer"
+                >
                   <rect
                     x={s.x}
                     y={yOf(l) + 0.6}
@@ -165,6 +254,30 @@ export function SectionExplorer({
                 </g>
               );
             })}
+            {/* Hovered floor: brass outline and its level code at the left, so floors read as clickable */}
+            {hovered !== null && hovered !== level ? (
+              <g pointerEvents="none">
+                <rect
+                  x={shape(hovered).x - 1}
+                  y={yOf(hovered) + 0.2}
+                  width={shape(hovered).w + 2}
+                  height={ROW - 0.4}
+                  fill="none"
+                  stroke="var(--brass)"
+                  strokeWidth={0.9}
+                />
+                <rect x={2} y={yOf(hovered) + 1} width={26} height={ROW - 2} className="fill-navy" />
+                <text
+                  x={26}
+                  y={yOf(hovered) + ROW - 2}
+                  textAnchor="end"
+                  className="fill-brass"
+                  style={{ fontSize: 7, fontVariationSettings: '"wdth" 75', fontVariantNumeric: "tabular-nums" }}
+                >
+                  {levelCode(hovered)}
+                </text>
+              </g>
+            ) : null}
             {/* E-Deck marker */}
             <line x1={34} x2={210} y1={yOf(6)} y2={yOf(6)} stroke="var(--brass)" strokeWidth={0.6} />
             {/* Ground datum ±0.00 */}
@@ -210,7 +323,7 @@ export function SectionExplorer({
               onKeyDown={onKey}
               className={cn(
                 "plaque absolute flex h-11 w-[3.25rem] -translate-x-1/2 -translate-y-1/2 items-center justify-center !p-0 transition-[top] duration-200 ease-[var(--ease-lift)]",
-                dragging && "duration-0",
+                (dragging || riding) && "duration-0",
               )}
               style={{
                 top: `${carriageTop}%`,
@@ -222,17 +335,84 @@ export function SectionExplorer({
             >
               <span className="t-level text-sm text-brass">{levelCode(level)}</span>
             </div>
+            {/* Drag cue until first use (outside the clipped plaque): a pulsing ring and chevrons above and below */}
+            {!touched ? (
+              <span
+                aria-hidden
+                className={cn(
+                  "pointer-events-none absolute h-11 w-[3.25rem] -translate-x-1/2 -translate-y-1/2 transition-[top] duration-200 ease-[var(--ease-lift)]",
+                  (dragging || riding) && "duration-0",
+                )}
+                style={{ top: `${carriageTop}%`, left: `${((232 / W - 0.8) / 0.2) * 100}%` }}
+              >
+                <span className="explorer-ping absolute -inset-1.5 border border-brass" />
+                <svg width="12" height="8" viewBox="0 0 12 8" className="explorer-bob-up absolute -top-4 left-1/2 -translate-x-1/2 fill-brass">
+                  <path d="M6 0l6 8H0z" />
+                </svg>
+                <svg width="12" height="8" viewBox="0 0 12 8" className="explorer-bob-down absolute -bottom-4 left-1/2 -translate-x-1/2 rotate-180 fill-brass">
+                  <path d="M6 0l6 8H0z" />
+                </svg>
+                {/* Coach mark: an explicit callout pinned above the carriage, right-aligned so it stays inside the drawing */}
+                {!riding ? (
+                  <span className="explorer-coach absolute bottom-[calc(100%+1.6rem)] end-0 flex items-center gap-2 whitespace-nowrap bg-brass px-3 py-2 text-lacquer">
+                    <Hand className="explorer-hand size-4" strokeWidth={1.75} />
+                    <span className="t-label text-[0.6rem]">Drag the lift</span>
+                    {/* pointer down to the carriage */}
+                    <span className="absolute -bottom-1.5 end-5 size-3 rotate-45 bg-brass" />
+                  </span>
+                ) : null}
+              </span>
+            ) : null}
           </div>
         </div>
-        <p id={titleId} className="t-label mt-5 text-center text-ivory-muted">
-          Tower C section. Drag the lift, tap a floor, or use arrow keys.
+        <p id={titleId} className="sr-only">
+          Tower C section. Drag the lift, tap a floor, choose a stop, or use the arrow keys.
         </p>
+        <div aria-hidden className="mx-auto mt-7 grid max-w-[22rem] grid-cols-2 border-y border-datum-navy">
+          <span className="t-note flex items-center gap-2.5 py-3 text-ivory-muted">
+            <Hand className="size-4 shrink-0 text-brass" strokeWidth={1.5} />
+            Drag the brass lift
+          </span>
+          <span className="t-note flex items-center gap-2.5 border-s border-datum-navy py-3 ps-4 text-ivory-muted">
+            <MousePointerClick className="size-4 shrink-0 text-brass" strokeWidth={1.5} />
+            Tap any floor
+          </span>
+        </div>
       </div>
 
       {/* Readout panel */}
-      <div className="lg:col-span-7">
+      <div className="min-w-0 lg:col-span-7">
+        {/* Stops: explicit lift buttons for every band, the obvious way in */}
+        <div className="mb-8">
+          <p className="t-note mb-3 text-ivory-muted">Jump to a stop</p>
+          <ul className="no-scrollbar scroll-hint -mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0" data-lenis-prevent>
+            {[...levels].map((b) => {
+              const active = b === band;
+              const stop = b.unitTableId === "typical" ? initial : b.to;
+              return (
+                <li key={b.code} className="shrink-0">
+                  <button
+                    type="button"
+                    aria-pressed={active}
+                    onClick={() => {
+                      touch();
+                      rideTo(stop);
+                    }}
+                    className={cn(
+                      "group flex min-h-11 items-center gap-2.5 border px-3.5 transition-colors duration-300",
+                      active ? "border-brass bg-brass text-lacquer" : "border-datum-navy text-ivory hover:border-brass",
+                    )}
+                  >
+                    <span className={cn("t-level text-[0.8rem]", active ? "text-lacquer" : "text-brass")}>{b.code}</span>
+                    <span className="t-label text-[0.6rem]">{stopName[b.kind] ?? b.name}</span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
         <div className="flex items-end gap-6 border-b border-datum-navy pb-6">
-          <p className="t-numeral text-[clamp(5rem,3rem+8vw,9rem)] text-brass" aria-hidden>
+          <p className="t-numeral text-[clamp(4.5rem,min(3rem+8vw,1rem+12svh),9rem)] text-brass" aria-hidden>
             {level <= 5 ? levelCode(level) : String(level).padStart(2, "0")}
           </p>
           <div className="pb-3">

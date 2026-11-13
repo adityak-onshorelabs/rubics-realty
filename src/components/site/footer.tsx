@@ -95,7 +95,7 @@ export async function Footer() {
           <p>
             © {year} {company.name}. A {company.group} company.
           </p>
-          <p className="flex flex-wrap gap-x-5 gap-y-2">
+          <p className="flex flex-wrap items-center gap-x-5">
             {projects
               .filter((p) => p.rera)
               .map((p) => (
@@ -103,10 +103,10 @@ export async function Footer() {
                   {p.name}: MahaRERA {p.rera!.number}
                 </span>
               ))}
-            <Link href="/privacy" className="underline-offset-4 hover:text-ivory hover:underline">
+            <Link href="/privacy" className="inline-flex min-h-11 items-center underline-offset-4 hover:text-ivory hover:underline">
               Privacy
             </Link>
-            <Link href="/disclaimer" className="underline-offset-4 hover:text-ivory hover:underline">
+            <Link href="/disclaimer" className="inline-flex min-h-11 items-center underline-offset-4 hover:text-ivory hover:underline">
               Disclaimer
             </Link>
           </p>

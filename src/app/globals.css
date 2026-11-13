@@ -4,7 +4,8 @@
 
 /*
  * Rubics Realty tokens. Concept: Art Deco lift lobby (navy lacquer, brass indicator, cream travertine)
- * read against a tower section drawing. OKLCH is the source of truth. See DESIGN.md.
+ * read against an architect's drawing set (section cuts, dimension strings, title blocks, plates).
+ * OKLCH is the source of truth. See DESIGN.md.
  */
 :root {
   /* Navy lacquer */
@@ -57,8 +58,26 @@
   --ring: var(--brass-deep);
   --radius: 0rem;
 
+  /* Motion */
   --ease-lift: cubic-bezier(0.65, 0, 0.35, 1);
-  --header-h: 4.5rem;
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Header: compact so short laptop screens keep their height for content.
+     --header-shift is 0 or -header-h (set by the header when it tucks away on scroll down). */
+  --header-h: 3.5rem;
+  --header-shift: 0px;
+
+  /* Paper of the BeauMonté pencil sketch (sampled from the PNG), so the drawing sits on its sheet seamlessly */
+  --paper: rgb(247 240 227);
+
+  /* The colour behind content; plate curtains match it */
+  --surface: var(--travertine);
+}
+@media (min-width: 1536px) {
+  :root {
+    --header-h: 4rem;
+  }
 }
 
 .accent-beaumonte {
@@ -116,6 +135,8 @@
   --radius-xl: 0rem;
 
   --ease-lift: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @layer base {
@@ -127,6 +148,14 @@
     -webkit-text-size-adjust: 100%;
     text-rendering: optimizeLegibility;
     font-kerning: normal;
+  }
+  /* Large monitors: grow the whole rem system (type, spacing, the 85rem frame) with the viewport, so a
+     1440p or 4K screen sees the same proportions as a laptop instead of a small column of small text.
+     16px at 1600px wide, about 18px at 1920, 21px at 2560 and above. */
+  @media (min-width: 1600px) {
+    html {
+      font-size: min(calc(100% + (100vw - 1600px) * 0.0052), 131.25%);
+    }
   }
   body {
     background: var(--travertine);
@@ -144,7 +173,8 @@
     outline: 2px solid var(--brass-deep);
     outline-offset: 3px;
   }
-  .on-navy :focus-visible {
+  .on-navy :focus-visible,
+  .on-lacquer :focus-visible {
     outline-color: var(--brass);
   }
   ::selection {
@@ -154,16 +184,18 @@
   [id] {
     scroll-margin-top: calc(var(--header-h) + 1rem);
   }
-  @media (max-width: 1279px) {
+  @media (max-width: 1023px) {
     .accent-beaumonte [id],
     .accent-lalbaug [id] {
-      scroll-margin-top: calc(var(--header-h) + 4.5rem);
+      scroll-margin-top: calc(var(--header-h) + 4rem);
     }
   }
 }
 
 /* ---------------------------------------------------------------- */
 /* Type roles (Mona Sans width axis carries the concept)             */
+/* Sizes respond to viewport height as well as width, so a 768px-tall */
+/* laptop does not get desktop-monitor display type.                  */
 /* ---------------------------------------------------------------- */
 @layer components {
   .t-display {
@@ -171,7 +203,31 @@
     font-weight: 300;
     letter-spacing: -0.02em;
     line-height: 0.98;
-    font-size: clamp(2.75rem, 1.6rem + 5.2vw, 6.5rem);
+    font-size: clamp(2.6rem, min(1.6rem + 5.2vw, 0.75rem + 9.5svh), 6.5rem);
+    text-wrap: balance;
+  }
+  /* Home hero: the film leads, so the headline is a caption-sized display line */
+  .t-hero {
+    font-variation-settings: "wdth" 80;
+    font-weight: 300;
+    letter-spacing: -0.02em;
+    line-height: 0.98;
+    font-size: clamp(2.4rem, min(1.2rem + 3.6vw, 0.6rem + 6.6svh), 4.75rem);
+  }
+  /* Directory names: tall, condensed, like lobby-board lettering */
+  .t-board {
+    font-variation-settings: "wdth" 78;
+    font-weight: 300;
+    letter-spacing: -0.02em;
+    line-height: 0.95;
+    font-size: clamp(2.5rem, min(1.4rem + 4.4vw, 0.9rem + 7.5svh), 5.5rem);
+  }
+  .t-statement {
+    font-variation-settings: "wdth" 90;
+    font-weight: 300;
+    letter-spacing: -0.012em;
+    line-height: 1.16;
+    font-size: clamp(1.55rem, min(1rem + 2.1vw, 0.8rem + 3.6svh), 2.75rem);
     text-wrap: balance;
   }
   .t-numeral {
@@ -185,21 +241,21 @@
     font-variation-settings: "wdth" 85;
     font-weight: 350;
     letter-spacing: -0.015em;
-    line-height: 1.05;
-    font-size: clamp(2rem, 1.4rem + 2.6vw, 3.5rem);
+    line-height: 1.04;
+    font-size: clamp(2rem, min(1.4rem + 2.6vw, 1rem + 5svh), 3.5rem);
     text-wrap: balance;
   }
   .t-h3 {
     font-variation-settings: "wdth" 100;
     font-weight: 500;
     line-height: 1.2;
-    font-size: clamp(1.25rem, 1.1rem + 0.6vw, 1.6rem);
+    font-size: clamp(1.2rem, 1.08rem + 0.5vw, 1.5rem);
     text-wrap: balance;
   }
   .t-lead {
     font-variation-settings: "wdth" 100;
     font-weight: 350;
-    font-size: clamp(1.125rem, 1.05rem + 0.35vw, 1.3rem);
+    font-size: clamp(1.1rem, 1.04rem + 0.3vw, 1.275rem);
     line-height: 1.5;
     text-wrap: pretty;
   }
@@ -208,7 +264,9 @@
     text-wrap: pretty;
   }
   .on-navy .t-body,
-  .on-navy .t-lead {
+  .on-navy .t-lead,
+  .on-lacquer .t-body,
+  .on-lacquer .t-lead {
     line-height: 1.7;
   }
   .t-label {
@@ -218,6 +276,15 @@
     letter-spacing: 0.16em;
     text-transform: uppercase;
     line-height: 1.4;
+  }
+  /* Drawing annotation: the small print on a section drawing */
+  .t-note {
+    font-variation-settings: "wdth" 112;
+    font-weight: 500;
+    font-size: 0.625rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    line-height: 1.3;
   }
   .t-level {
     font-variation-settings: "wdth" 75;
@@ -239,21 +306,27 @@
       padding-inline: 1.5rem;
     }
   }
+  /* From 1024px the lift shaft rides the left edge, so the frame gives it a lane */
   @media (min-width: 1024px) {
     .frame {
-      padding-inline: 2.5rem;
+      padding-inline: 4rem 2.5rem;
     }
   }
   .section-y {
-    padding-block: clamp(4.5rem, 3rem + 6vw, 9rem);
+    padding-block: clamp(3.5rem, 1.25rem + 3.2vw + 3svh, 8rem);
+  }
+  .section-y-tight {
+    padding-block: clamp(3rem, 1rem + 2.4vw + 2svh, 6rem);
   }
 
   /* Surfaces */
   .on-navy {
+    --surface: var(--navy);
     background: var(--navy);
     color: var(--ivory);
   }
   .on-lacquer {
+    --surface: var(--lacquer);
     background: var(--lacquer);
     color: var(--ivory);
   }
@@ -293,18 +366,71 @@
     --plaque-line: var(--brass);
   }
 
-  /* Datum line: full-width hairline with level marker */
+  /* Datum line: level marker, engraved label, then a hairline to the far edge (and optional sheet meta) */
   .datum {
     display: flex;
     align-items: center;
     gap: 0.75rem;
   }
-  .datum::after {
-    content: "";
+  .datum-rule {
     flex: 1;
     height: 1px;
     background: currentColor;
     opacity: 0.35;
+    transform-origin: 0 50%;
+  }
+
+  /* Brass inlay: a double hairline, the Deco lobby's metal strip set into stone */
+  .inlay {
+    height: 4px;
+    border-block: 1px solid var(--brass-deep);
+    opacity: 0.8;
+  }
+  .on-navy .inlay,
+  .on-lacquer .inlay {
+    border-color: var(--brass);
+    opacity: 0.6;
+  }
+
+  /* Title block: ruled cells with a tiny label over a value, like the corner of a drawing sheet */
+  .tblock {
+    display: grid;
+    border-block: 1px solid var(--tblock-line, var(--datum));
+  }
+  .tblock > * {
+    padding-block: 0.8rem;
+    padding-inline: 1rem;
+    min-width: 0;
+  }
+  .tblock > * + * {
+    border-inline-start: 1px solid var(--tblock-line, var(--datum));
+  }
+  .on-navy .tblock,
+  .on-lacquer .tblock {
+    --tblock-line: var(--datum-navy);
+  }
+
+  /* Plate: an image presented as a numbered drawing plate with printer's crop marks */
+  .plate-crop {
+    --c: var(--brass-deep);
+    position: absolute;
+    inset: -10px;
+    pointer-events: none;
+    opacity: 0.85;
+    background:
+      linear-gradient(var(--c) 0 0) left 0 top 9px / 6px 1px no-repeat,
+      linear-gradient(var(--c) 0 0) left 9px top 0 / 1px 6px no-repeat,
+      linear-gradient(var(--c) 0 0) right 0 top 9px / 6px 1px no-repeat,
+      linear-gradient(var(--c) 0 0) right 9px top 0 / 1px 6px no-repeat,
+      linear-gradient(var(--c) 0 0) left 0 bottom 9px / 6px 1px no-repeat,
+      linear-gradient(var(--c) 0 0) left 9px bottom 0 / 1px 6px no-repeat,
+      linear-gradient(var(--c) 0 0) right 0 bottom 9px / 6px 1px no-repeat,
+      linear-gradient(var(--c) 0 0) right 9px bottom 0 / 1px 6px no-repeat;
+  }
+  .on-navy .plate-crop,
+  .on-lacquer .plate-crop {
+    --c: var(--brass);
+    opacity: 0.6;
   }
 
   /* Brass rule that grows from the start on hover */
@@ -313,7 +439,7 @@
     background-size: 0% 1px;
     background-position: 0 100%;
     background-repeat: no-repeat;
-    transition: background-size 280ms var(--ease-lift);
+    transition: background-size 420ms var(--ease-out-expo);
   }
   .rule-grow:hover,
   .rule-grow:focus-visible,
@@ -325,7 +451,7 @@
     --rule-color: var(--brass);
   }
 
-  /* Subtle lacquer grain on navy bands */
+  /* Lacquer grain on navy bands */
   .grain {
     position: relative;
     isolation: isolate;
@@ -340,11 +466,314 @@
     background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
   }
 
+  /* Travertine: horizontal veining and the stone's small pits, very quiet, on cream bands */
+  .stone {
+    position: relative;
+    isolation: isolate;
+  }
+  .stone::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    /* No blend mode: a blended full-section layer costs a recomposite every scrolled frame */
+    opacity: 0.5;
+    background-image:
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='900' height='520'><filter id='v' x='0' y='0'><feTurbulence type='fractalNoise' baseFrequency='0.0018 0.034' numOctaves='3' seed='11' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.62  0 0 0 0 0.53  0 0 0 0 0.38  0 0 0 -2.4 1.32'/></filter><rect width='100%' height='100%' filter='url(%23v)' opacity='0.16'/></svg>"),
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='p'><feTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='1' seed='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.5  0 0 0 0 0.42  0 0 0 0 0.3  0 0 0 -9 6.3'/></filter><rect width='100%' height='100%' filter='url(%23p)' opacity='0.22'/></svg>");
+  }
+
   .no-scrollbar {
     scrollbar-width: none;
   }
   .no-scrollbar::-webkit-scrollbar {
     display: none;
+  }
+
+  /* Odometer digits (RollingNumber): every glyph box is exactly 1em so digits and symbols share a baseline */
+  .odo,
+  .odo-ch {
+    display: inline-block;
+    height: 1em;
+    line-height: 1em;
+    vertical-align: top;
+  }
+  .odo {
+    overflow: hidden;
+  }
+  .odo-strip {
+    display: block;
+    transform: translateY(calc(var(--n) * -1em));
+  }
+  .odo-strip > span {
+    display: block;
+    height: 1em;
+    line-height: 1em;
+  }
+
+  /* SplitText words: each word rises out of its own mask */
+  .split-w {
+    display: inline-block;
+    overflow: hidden;
+    vertical-align: top;
+    padding-block-end: 0.1em;
+    margin-block-end: -0.1em;
+  }
+  .split-i {
+    display: inline-block;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Reveal system                                                       */
+/* Elements carry data-reveal="kind" and an optional --d delay. The     */
+/* RevealObserver sets data-in once they enter the viewport (held while */
+/* the lift doors are shut). Hidden states apply only when JS is running */
+/* (html.js, set inline before paint), never under reduced motion, and   */
+/* never if the observer failed to start (html.reveal-off failsafe).     */
+/* ------------------------------------------------------------------ */
+[data-reveal] {
+  --d: 0ms;
+}
+@media (prefers-reduced-motion: no-preference) {
+  /* fade: soft rise */
+  .js [data-reveal="fade"] {
+    transition:
+      opacity 900ms var(--ease-out-quart) var(--d),
+      transform 1200ms var(--ease-out-expo) var(--d);
+  }
+  .js:not(.reveal-off) [data-reveal="fade"]:not([data-in]) {
+    opacity: 0;
+    transform: translate3d(0, 18px, 0);
+  }
+
+  /* text: words rise out of masks, staggered */
+  .js [data-reveal="text"] .split-i {
+    transition: transform 1100ms var(--ease-out-expo) calc(var(--d) + min(var(--i), 18) * 34ms);
+  }
+  .js:not(.reveal-off) [data-reveal="text"]:not([data-in]) .split-i {
+    transform: translate3d(0, 110%, 0);
+  }
+
+  /* plate: a curtain in the surrounding surface colour lifts away, so the image rises into its frame
+     bottom-up like floors going up, settling from a slight zoom. (The observed element itself is never
+     clipped: IntersectionObserver treats a fully clipped element as not visible.) */
+  .js [data-reveal="plate"]::after {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    z-index: 2;
+    pointer-events: none;
+    background: var(--surface);
+    transform-origin: 50% 0;
+    transform: scaleY(0);
+    transition: transform 1400ms var(--ease-out-expo) var(--d);
+  }
+  /* The settle uses the independent `scale` property; `transform` on the media belongs to GSAP parallax and
+     must never carry a CSS transition (it would chase every scrubbed frame and judder). */
+  .js [data-reveal="plate"] .plate-media {
+    transition:
+      scale 1800ms var(--ease-out-expo) var(--d),
+      filter 1000ms var(--ease-out-expo);
+  }
+  .js .group:hover [data-reveal="plate"] .plate-media {
+    transition:
+      scale 1000ms var(--ease-out-expo),
+      filter 1000ms var(--ease-out-expo);
+  }
+  .js:not(.reveal-off) [data-reveal="plate"]:not([data-in])::after {
+    transform: scaleY(1);
+  }
+  .js:not(.reveal-off) [data-reveal="plate"]:not([data-in]) .plate-media {
+    scale: 1.12;
+  }
+
+  /* wipe: engraved labels revealed from the start edge (children are clipped, not the observed element) */
+  .js [data-reveal="wipe"] > * {
+    transition: clip-path 1000ms var(--ease-out-expo) var(--d);
+  }
+  .js:not(.reveal-off) [data-reveal="wipe"]:not([data-in]) > * {
+    clip-path: inset(0 100% 0 0);
+  }
+
+  /* line: hairlines draw from the start */
+  .js [data-reveal="line"],
+  .js [data-reveal] .datum-rule {
+    transition: transform 1400ms var(--ease-out-expo) calc(var(--d) + 120ms);
+  }
+  .js:not(.reveal-off) [data-reveal="line"]:not([data-in]),
+  .js:not(.reveal-off) [data-reveal]:not([data-in]) .datum-rule {
+    transform: scaleX(0);
+  }
+
+  /* draw: SVG strokes (pathLength="1") draw on, staggered by --i */
+  .js [data-reveal="draw"] .draw {
+    transition: stroke-dashoffset 1600ms var(--ease-out-quart) calc(var(--d) + var(--i, 0) * 140ms);
+  }
+  .js [data-reveal="draw"] .draw-fade {
+    transition: opacity 700ms var(--ease-out-quart) calc(var(--d) + 350ms + var(--i, 0) * 110ms);
+  }
+  .js:not(.reveal-off) [data-reveal="draw"]:not([data-in]) .draw {
+    stroke-dashoffset: 1;
+  }
+  .js:not(.reveal-off) [data-reveal="draw"]:not([data-in]) .draw-fade {
+    opacity: 0;
+  }
+
+  /* count: odometer digits roll up from zero */
+  .js [data-reveal="count"] .odo-strip {
+    transition: transform 1700ms var(--ease-out-expo) calc(var(--d) + var(--i) * 80ms);
+  }
+  .js:not(.reveal-off) [data-reveal="count"]:not([data-in]) .odo-strip {
+    transform: translateY(0);
+  }
+
+  /* stagger: children fade up in order (--i set per child) */
+  .js [data-reveal="stagger"] > * {
+    transition:
+      opacity 800ms var(--ease-out-quart) calc(var(--d) + var(--i, 0) * 70ms),
+      transform 1100ms var(--ease-out-expo) calc(var(--d) + var(--i, 0) * 70ms);
+  }
+  .js:not(.reveal-off) [data-reveal="stagger"]:not([data-in]) > * {
+    opacity: 0;
+    transform: translate3d(0, 16px, 0);
+  }
+}
+.draw {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+}
+
+/* Unit scale bars grow once their table is in view, and again on each tab switch (rows remount) */
+@media (prefers-reduced-motion: no-preference) {
+  .js [data-in] .unit-bar {
+    transform-origin: 0 50%;
+    animation: bar-grow 1000ms var(--ease-out-expo) both;
+    animation-delay: calc(120ms + var(--i, 0) * 50ms);
+  }
+  .js:not(.reveal-off) [data-reveal]:not([data-in]) .unit-bar {
+    transform: scaleX(0);
+  }
+}
+@keyframes bar-grow {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+/* Section explorer drag cue: ring pulses out from the carriage, chevrons bob in the drag directions */
+@media (prefers-reduced-motion: no-preference) {
+  .explorer-ping {
+    animation: explorer-ping 1.8s var(--ease-out-quart) infinite;
+  }
+  .explorer-bob-up {
+    animation: explorer-bob-up 1.4s var(--ease-lift) infinite;
+  }
+  .explorer-bob-down {
+    animation: explorer-bob-down 1.4s var(--ease-lift) infinite;
+  }
+  .explorer-coach {
+    animation: explorer-coach-in 600ms var(--ease-out-expo) both;
+  }
+  .explorer-hand {
+    animation: explorer-hand 1.6s var(--ease-lift) infinite;
+  }
+}
+@keyframes explorer-coach-in {
+  from {
+    opacity: 0;
+    translate: 0 6px;
+  }
+}
+@keyframes explorer-hand {
+  25% {
+    translate: 0 -3px;
+  }
+  75% {
+    translate: 0 3px;
+  }
+}
+@keyframes explorer-ping {
+  0% {
+    opacity: 0.9;
+    transform: scale(1);
+  }
+  80%,
+  100% {
+    opacity: 0;
+    transform: scale(1.45);
+  }
+}
+@keyframes explorer-bob-up {
+  50% {
+    translate: 0 -3px;
+  }
+}
+@keyframes explorer-bob-down {
+  50% {
+    translate: 0 3px;
+  }
+}
+
+/* Horizontal strips that scroll on small screens fade at the end edge, so it is clear there is more */
+@media (max-width: 639px) {
+  .scroll-hint {
+    mask-image: linear-gradient(to right, black 84%, transparent);
+  }
+}
+
+/* Back to top (scroll-top.tsx): the arrow keeps launching while the lift rides; a brass pulse on arrival */
+@media (prefers-reduced-motion: no-preference) {
+  .scroll-top-launch {
+    animation: scroll-top-launch 640ms var(--ease-lift) infinite;
+  }
+  .scroll-top-pulse {
+    animation: scroll-top-pulse 900ms var(--ease-out-expo) both;
+  }
+}
+@keyframes scroll-top-launch {
+  0% {
+    transform: translateY(0);
+  }
+  45% {
+    transform: translateY(-115%);
+  }
+  46% {
+    transform: translateY(115%);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+@keyframes scroll-top-pulse {
+  from {
+    opacity: 0.9;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.7);
+  }
+}
+/* Phones: sit above the sticky Call / Brochure / Visit bar on project pages */
+@media (max-width: 767px) {
+  body:has(.mobile-action-bar) .scroll-top {
+    bottom: calc(3.5rem + env(safe-area-inset-bottom) + 1rem);
+  }
+}
+
+/* Mobile menu: rows arrive in order */
+@media (prefers-reduced-motion: no-preference) {
+  dialog[open] .menu-row {
+    animation: menu-row 700ms var(--ease-out-expo) both;
+    animation-delay: calc(80ms + var(--i, 0) * 45ms);
+  }
+}
+@keyframes menu-row {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 14px, 0);
   }
 }
 
@@ -356,17 +785,28 @@ html::-webkit-scrollbar {
   display: none;
 }
 
+/* Lenis smooth scroll (wheel and trackpad only; touch stays native). Subset of lenis.css: its rule that
+   disables pointer events on iframes would break the Google map. */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-stopped {
+  overflow: clip;
+}
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+/* Parallax media is oversized so a scrubbed shift never shows the frame's edge */
+[data-parallax] .plate-media {
+  top: -7% !important;
+  height: 114% !important;
+}
+
 /* Lock page scroll while a modal dialog (mobile menu) is open */
 html:has(dialog[open]) {
   overflow: hidden;
-}
-
-/* Project pages: leave room for the fixed lift index on wide screens */
-@media (min-width: 1280px) {
-  .accent-beaumonte .frame,
-  .accent-lalbaug .frame {
-    padding-inline-end: 6.5rem;
-  }
 }
 
 /* Keep the footer clear of the sticky mobile action bar on project pages */

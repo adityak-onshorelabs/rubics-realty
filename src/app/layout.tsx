@@ -8,6 +8,9 @@ import { Providers } from "@/components/site/providers";
 import { FloorShaft } from "@/components/site/floor-rail";
 import { LiftDoors } from "@/components/site/lift-doors";
 import { JsonLd } from "@/components/site/json-ld";
+import { RevealObserver } from "@/components/site/reveal-observer";
+import { SmoothScroll } from "@/components/site/smooth-scroll";
+import { ScrollTop } from "@/components/site/scroll-top";
 import "./globals.css";
 
 const mona = Mona_Sans({
@@ -65,10 +68,15 @@ const orgLd = {
   sameAs: company.social.map((s) => s.href),
 };
 
+/* Runs before the body paints: enables reveal states only when JS runs, and switches them off if the
+   observer has not started within 4s (slow or failed bundle), so content can never stay hidden. */
+const revealBoot = `document.documentElement.classList.add("js");setTimeout(function(){var d=document.documentElement;if(!d.classList.contains("reveal-ready"))d.classList.add("reveal-off")},4000);`;
+
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en-IN" className={`${mona.variable} antialiased`}>
+    <html lang="en-IN" className={`${mona.variable} antialiased`} suppressHydrationWarning>
       <body className="flex min-h-dvh flex-col">
+        <script dangerouslySetInnerHTML={{ __html: revealBoot }} />
         <a
           href="#main"
           className="t-label sr-only z-50 bg-brass px-4 py-3 text-lacquer focus:not-sr-only focus:fixed focus:start-4 focus:top-4"
@@ -83,6 +91,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <Footer />
           <FloorShaft />
           <LiftDoors />
+          <RevealObserver />
+          <SmoothScroll />
+          <ScrollTop />
         </Providers>
         <JsonLd data={orgLd} />
       </body>

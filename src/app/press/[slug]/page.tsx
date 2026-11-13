@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
@@ -7,6 +6,8 @@ import { pressStories } from "@/content/press";
 import { absoluteUrl, formatDate } from "@/lib/site";
 import { JsonLd } from "@/components/site/json-ld";
 import { PageHeader } from "@/components/site/page-header";
+import { Plate } from "@/components/site/plate";
+import { Reveal } from "@/components/site/reveal";
 
 export function generateStaticParams() {
   return pressStories.map((s) => ({ slug: s.slug }));
@@ -38,8 +39,10 @@ export default async function PressStoryPage({ params }: PageProps<"/press/[slug
       <PageHeader
         level="L01"
         label={`Press · ${formatDate(story.date)}`}
-        title={<span className="block text-[clamp(2.25rem,1.4rem+3.4vw,4.5rem)] leading-[1.02]">{story.title}</span>}
+        title={story.title}
+        titleClassName="text-[clamp(2.1rem,min(1.4rem+3.2vw,0.9rem+6svh),4.25rem)] leading-[1.02] lg:col-span-10"
       />
+      <div className="stone">
       <div className="frame section-y grid gap-12 lg:grid-cols-12">
         <aside className="lg:col-span-3">
           <Link href="/press" className="t-label inline-flex min-h-11 items-center gap-2 text-graphite-muted hover:text-graphite">
@@ -53,17 +56,15 @@ export default async function PressStoryPage({ params }: PageProps<"/press/[slug
           </ul>
         </aside>
         <div className="lg:col-span-8 lg:col-start-5">
-          <figure className="mb-10" style={{ maxWidth: story.image.width }}>
-            <Image
-              src={story.image.src}
-              alt={story.image.alt}
-              width={story.image.width}
-              height={story.image.height}
-              sizes="(min-width: 1024px) 50vw, 92vw"
-              loading="eager"
-              className="h-auto w-full bg-lacquer"
-            />
-          </figure>
+          <Plate
+            className="mb-12"
+            image={story.image}
+            sizes="(min-width: 1024px) 50vw, 92vw"
+            priority
+            frameClassName="max-h-[calc(100svh-var(--header-h)-6rem)]"
+            imageClassName="object-contain"
+          />
+          <Reveal delay={150}>
           {/* Excerpt only: some items are third-party journalism, not Rubics releases. TODO(client): add original article links. */}
           {story.body.slice(0, 3).map((p, i) => (
             <p key={i} className={i === 0 ? "t-lead" : "t-body mt-5 text-graphite-muted"}>
@@ -73,7 +74,9 @@ export default async function PressStoryPage({ params }: PageProps<"/press/[slug
           <p className="mt-12 border-t border-datum pt-5 text-xs text-graphite-muted">
             Excerpt. Full coverage appeared in the publications listed, from {formatDate(story.date)}.
           </p>
+          </Reveal>
         </div>
+      </div>
       </div>
       <JsonLd
         data={{
