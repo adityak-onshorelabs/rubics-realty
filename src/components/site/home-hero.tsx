@@ -7,8 +7,8 @@ import { Reveal, SplitText } from "./reveal";
 import { HeroScroll } from "./scroll-fx";
 
 /**
- * Home arrival. The film is the hero: full-bleed under a transparent header, a light shade only along the
- * bottom edge (behind the headline and the title-block strip) and a thin one at the top for the nav.
+ * Home arrival. The film is the hero: full-bleed under a transparent header, kept to a headline, one link and
+ * the film control. Shade stays at the top edge (nav) and bottom edge (headline); type carries its own shadow.
  */
 export function HomeHero() {
   const live = projects.find((p) => p.status === "launched");
@@ -41,54 +41,35 @@ export function HomeHero() {
           {/* Top: just enough for the transparent header to read */}
           <div className="absolute inset-x-0 top-0 h-40 bg-[linear-gradient(to_bottom,color-mix(in_oklch,var(--lacquer)_78%,transparent)_0%,color-mix(in_oklch,var(--lacquer)_40%,transparent)_55%,transparent_100%)]" />
           {/* Bottom: behind the headline and strip only */}
-          <div className="absolute inset-x-0 bottom-0 h-[46%] bg-[linear-gradient(to_top,color-mix(in_oklch,var(--lacquer)_86%,transparent)_0%,color-mix(in_oklch,var(--lacquer)_50%,transparent)_42%,transparent_100%)] md:h-[40%]" />
+          <div className="absolute inset-x-0 bottom-0 h-[42%] bg-[linear-gradient(to_top,color-mix(in_oklch,var(--lacquer)_72%,transparent)_0%,color-mix(in_oklch,var(--lacquer)_32%,transparent)_45%,transparent_100%)] md:h-[34%]" />
         </div>
 
         <div className="flex-1" />
 
-        <div data-hero-content className="frame pb-3 sm:pb-4">
-          <h1 id="hero-title" className="t-hero max-w-[14ch] text-ivory">
+        {/* Minimal by brief: the film leads. One headline, one way in, and the film control. */}
+        <div data-hero-content className="frame pb-6 sm:pb-8">
+          <h1
+            id="hero-title"
+            className="t-hero max-w-[14ch] font-[450] text-ivory [text-shadow:0_2px_28px_rgb(0_0_0/0.45),0_1px_2px_rgb(0_0_0/0.35)]"
+          >
             <SplitText lines={home.hero.title} delay={350} />
           </h1>
 
-          {live?.rera ? (
-            <Reveal delay={750} className="mt-6 lg:mt-8">
+          <Reveal delay={750} className="mt-6 flex items-center justify-between gap-4 lg:mt-8">
+            {live ? (
               <Link
                 href={`/projects/${live.slug}`}
-                className="tblock group grid grid-cols-[minmax(0,1fr)_auto] text-ivory [--tblock-line:color-mix(in_oklch,var(--ivory)_24%,transparent)] sm:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)_auto] lg:grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)_minmax(0,1fr)_auto] [&>*]:!pe-0 [&>*:first-child]:!ps-0 sm:[&>*+*]:!ps-5 lg:[&>*+*]:!ps-6"
+                className="group t-label inline-flex min-h-11 items-center gap-3 text-[0.68rem] text-ivory [text-shadow:0_1px_10px_rgb(0_0_0/0.5)]"
               >
-                <span className="hidden lg:block">
-                  <span className="t-note block text-ivory/60">Status</span>
-                  <span className="t-label mt-1.5 block text-accent-on-navy accent-beaumonte">{live.statusLabel}</span>
+                <span className="flex size-10 items-center justify-center border border-ivory/60 bg-lacquer/20 backdrop-blur-[2px] transition-colors duration-300 group-hover:border-ivory group-hover:bg-ivory group-hover:text-lacquer">
+                  <ArrowUpRight aria-hidden className="size-4 transition-transform duration-300 group-hover:rotate-45" />
                 </span>
-                <span className="max-lg:!border-s-0 max-lg:!ps-0">
-                  <span className="t-note block text-ivory/60">
-                    <span className="lg:hidden">{live.statusLabel} · </span>Project
-                  </span>
-                  <span className="mt-1 block truncate">
-                    {live.name}, {live.locality}
-                  </span>
-                </span>
-                <span className="hidden sm:block">
-                  <span className="t-note block text-ivory/60">MahaRERA</span>
-                  <span className="t-level mt-1 block">{live.rera.number}</span>
-                </span>
-                <span className="flex items-center gap-3 !ps-5 lg:!ps-8">
-                  <span className="t-label hidden text-[0.66rem] md:inline">Explore the tower</span>
-                  <span className="flex size-10 items-center justify-center border border-ivory/35 transition-colors duration-300 group-hover:border-ivory group-hover:bg-ivory group-hover:text-lacquer">
-                    <ArrowUpRight aria-hidden className="size-4 transition-transform duration-300 group-hover:rotate-45" />
-                  </span>
-                  <span className="sr-only md:hidden">Explore the tower</span>
-                </span>
+                Explore {live.name}
               </Link>
-            </Reveal>
-          ) : null}
-
-          <Reveal delay={950} className="mt-1 flex items-center justify-between gap-4">
-            <p className="t-note text-ivory/70">
-              Film <span className="mx-1.5 text-brass">/</span> {home.hero.videoCaption}
-            </p>
-            <HeroFilmToggle />
+            ) : (
+              <span />
+            )}
+            <HeroFilmToggle className="[text-shadow:0_1px_10px_rgb(0_0_0/0.5)]" />
           </Reveal>
         </div>
       </section>
