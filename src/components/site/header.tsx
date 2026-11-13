@@ -84,9 +84,14 @@ export function Header() {
     document.documentElement.style.setProperty("--header-shift", tucked ? "calc(-1 * var(--header-h))" : "0px");
   }, [tucked]);
 
-  // The pill folds back on Escape and on a click outside it.
+  // The pill folds back on Escape, on a click outside it, and once the reader carries on scrolling.
   useEffect(() => {
     if (!open) return;
+    const openedAt = window.scrollY;
+    const onScrollAway = () => {
+      if (Math.abs(window.scrollY - openedAt) > 60) setOpen(false);
+    };
+    window.addEventListener("scroll", onScrollAway, { passive: true });
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         setOpen(false);
@@ -99,6 +104,7 @@ export function Header() {
     document.addEventListener("keydown", onKey);
     document.addEventListener("pointerdown", onDown);
     return () => {
+      window.removeEventListener("scroll", onScrollAway);
       document.removeEventListener("keydown", onKey);
       document.removeEventListener("pointerdown", onDown);
     };
@@ -221,19 +227,52 @@ export function Header() {
             aria-expanded={open}
             aria-controls="pill-nav"
             onClick={() => setOpen((o) => !o)}
-            className="group flex min-h-11 items-center gap-2.5 pe-2 text-ivory"
+            className="group flex min-h-11 items-center pe-2 text-ivory"
           >
-            <span className="relative block size-4">
-              <Menu aria-hidden className={cn("absolute inset-0 size-4 transition-[opacity,rotate] duration-300", open ? "rotate-90 opacity-0" : "opacity-100")} />
-              <X aria-hidden className={cn("absolute inset-0 size-4 text-brass transition-[opacity,rotate] duration-300", open ? "rotate-0 opacity-100" : "-rotate-90 opacity-0")} />
-            </span>
-            <span className="t-label text-[0.66rem]">{open ? "Close" : "Menu"}</span>
-            {!open && activeLabel ? (
-              <span className="t-note flex items-center gap-2 text-ivory-muted">
-                <span aria-hidden className="size-1 bg-brass" />
-                {activeLabel}
+            {/* Open: the three lines fold into one short brass line, like floors stacking. No "Close" word;
+                scrolling, Escape, a click outside or this line all fold the menu again. */}
+            <svg
+              aria-hidden
+              viewBox="0 0 16 16"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={1.5}
+              className={cn("size-4 shrink-0 overflow-visible transition-colors duration-300", open && "text-brass/80 group-hover:text-brass")}
+            >
+              {[3.5, 8, 12.5].map((y, i) => (
+                <line
+                  key={y}
+                  x1="1"
+                  x2="15"
+                  y1={y}
+                  y2={y}
+                  className="origin-center transition-[translate,scale,opacity] duration-500 ease-[var(--ease-out-expo)] [transform-box:fill-box]"
+                  style={
+                    open
+                      ? i === 1
+                        ? { scale: "0.6 1" }
+                        : { translate: `0 ${(8 - y).toFixed(1)}px`, opacity: 0 }
+                      : undefined
+                  }
+                />
+              ))}
+            </svg>
+            <span
+              className={cn(
+                "grid transition-[grid-template-columns,opacity] duration-500 ease-[var(--ease-out-expo)]",
+                open ? "grid-cols-[0fr] opacity-0" : "grid-cols-[1fr] opacity-100",
+              )}
+            >
+              <span className="flex items-center gap-2.5 overflow-hidden whitespace-nowrap ps-2.5">
+                <span className="t-label text-[0.66rem]">Menu</span>
+                {activeLabel ? (
+                  <span className="t-note flex items-center gap-2 text-ivory-muted">
+                    <span aria-hidden className="size-1 bg-brass" />
+                    {activeLabel}
+                  </span>
+                ) : null}
               </span>
-            ) : null}
+            </span>
           </button>
 
           {/* Links fold out inside the pill (grid column 0fr to 1fr) */}
